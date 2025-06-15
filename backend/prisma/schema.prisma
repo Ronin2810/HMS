@@ -1,0 +1,147 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Role {
+  role_id Int    @id @default(autoincrement())
+  name    String @unique
+  Staff   Staff[]
+}
+
+model Department {
+  dept_id Int      @id @default(autoincrement())
+  name    String   @unique
+  Staff   Staff[]
+  Visit   Visit[]
+  Report  Report[]
+  visitReferrals VisitReferral[]
+
+}
+
+model Staff {
+  staff_id      Int       @id @default(autoincrement())
+  username      String    @unique
+  password_hash String
+  role_id       Int
+  dept_id       Int?
+  created_at    DateTime  @default(now())
+
+  role          Role      @relation(fields: [role_id], references: [role_id])
+  department    Department? @relation(fields: [dept_id], references: [dept_id])
+  referrals     VisitReferral[]
+  activities    ActivityLog[]
+}
+
+model Patient {
+  patient_id    String    @id @default(uuid())
+  first_name    String
+  last_name     String
+  date_of_birth DateTime?
+  gender        String?
+  contact_info  Json?
+  family_info   Json?
+  created_at    DateTime  @default(now())
+
+  visits        Visit[]
+  reports       Report[]
+  prescriptions Prescription[]
+}
+
+enum VisitType {
+  fresh
+  old
+  follow_up
+}
+
+model Visit {
+  visit_id          String         @id @default(uuid())
+  patient_id        String
+  dept_id           Int
+  primary_doctor_id Int?
+  visit_type        VisitType
+  bill_amount       Float          @default(0)
+  due_amount        Float          @default(0)
+  created_at        DateTime       @default(now())
+
+  patient           Patient        @relation(fields: [patient_id], references: [patient_id])
+  department        Department     @relation(fields: [dept_id], references: [dept_id])
+  referrals         VisitReferral[]
+  invoice           Invoice?
+  prescriptions     Prescription[]
+  activities        ActivityLog[]
+  reports Report[]
+
+}
+
+model VisitReferral {
+  referral_id        Int     @id @default(autoincrement())
+  visit_id           String
+  referred_dept_id   Int
+  referred_doctor_id Int?
+
+  visit               Visit      @relation(fields: [visit_id], references: [visit_id])
+  department          Department @relation(fields: [referred_dept_id], references: [dept_id])
+  doctor              Staff?     @relation(fields: [referred_doctor_id], references: [staff_id])
+}
+
+model Invoice {
+  invoice_id   Int     @id @default(autoincrement())
+  visit_id     String  @unique
+  total_amount Float
+  created_at   DateTime @default(now())
+
+  visit         Visit   @relation(fields: [visit_id], references: [visit_id])
+  payments      Payment[]
+}
+
+model Payment {
+  payment_id  Int      @id @default(autoincrement())
+  invoice_id  Int
+  amount_paid Float
+  paid_at     DateTime @default(now())
+  method      String
+
+  invoice     Invoice  @relation(fields: [invoice_id], references: [invoice_id])
+}
+
+model Report {
+  report_id  String   @id @default(uuid())
+  patient_id String
+  visit_id   String?
+  dept_id    Int?
+  created_at DateTime @default(now())
+  file_url   String
+  file_type  String?
+  metadata   Json?
+
+  patient    Patient  @relation(fields: [patient_id], references: [patient_id])
+  visit      Visit?   @relation(fields: [visit_id], references: [visit_id])
+  department Department? @relation(fields: [dept_id], references: [dept_id])
+}
+
+model ActivityLog {
+  log_id    Int      @id @default(autoincrement())
+  visit_id  String?
+  staff_id  Int?
+  action    String
+  logged_at DateTime @default(now())
+
+  visit     Visit?   @relation(fields: [visit_id], references: [visit_id])
+  staff     Staff?   @relation(fields: [staff_id], references: [staff_id])
+}
+
+model Prescription {
+  prescription_id String   @id @default(uuid())
+  patient_id      String
+  visit_id        String?
+  medicines       Json     // e.g. [{ name: "...", qty: 2, dose: "..."}]
+  created_at      DateTime @default(now())
+
+  patient         Patient  @relation(fields: [patient_id], references: [patient_id])
+  visit           Visit?   @relation(fields: [visit_id], references: [visit_id])
+}

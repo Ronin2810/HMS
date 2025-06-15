@@ -1,0 +1,18 @@
+{
+  "type": "module",
+  "name": "hospital-backend",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "nodemon src/index.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^4.16.2",
+    "express": "^4.18.2",
+    "hospital-backend": "file:"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22",
+    "prisma": "^4.16.2"
+  }
+}
