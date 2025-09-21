@@ -1,4 +1,3 @@
-// backend/src/services/patientService.js
 import prisma from '../prismaClient.js';
 
 export const getAllPatients = () =>

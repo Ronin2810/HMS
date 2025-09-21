@@ -1,11 +1,10 @@
 import { Router } from 'express';
-import * as ctrl from '../controllers/patientController.js';   // ← patientController!
+import * as ctrl from '../controllers/patientController.js';
 
-const router = Router();
-router.get( '/',       ctrl.list);
-router.get( '/:id',    ctrl.getById);
-router.post('/',       ctrl.create);
-router.put( '/:id',    ctrl.update);
-router.delete('/:id',  ctrl.remove);
-
-export default router;
+const r = Router();
+r.get('/', ctrl.list);
+r.get('/:id', ctrl.getById);
+r.post('/', ctrl.create);
+r.put('/:id', ctrl.update);
+r.delete('/:id', ctrl.remove);
+export default r;

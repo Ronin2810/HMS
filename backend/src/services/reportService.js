@@ -1,22 +1,17 @@
-// backend/src/services/reportService.js
 import prisma from '../prismaClient.js';
 
-export const getAllReports = () =>
-  prisma.report.findMany({
-    include: { patient: true, visit: true, department: true }
-  });
+function todayBounds() {
+  const now = new Date();
+  const start = new Date(now); start.setHours(0,0,0,0);
+  const end = new Date(now); end.setHours(23,59,59,999);
+  return { start, end };
+}
 
-export const getReportById = (id) =>
-  prisma.report.findUnique({
-    where: { report_id: id },
-    include: { patient: true, visit: true, department: true }
+export const getTodayReports = () =>
+  prisma.report.findMany({
+    where: { created_at: { gte: todayBounds().start, lte: todayBounds().end } },
+    include: { patient: true, visit: true }
   });
 
 export const createReport = (data) =>
-  prisma.report.create({ data });
-
-export const updateReport = (id, data) =>
-  prisma.report.update({ where: { report_id: id }, data });
-
-export const deleteReport = (id) =>
-  prisma.report.delete({ where: { report_id: id } });
+  prisma.report.create({ data, include: { patient: true, visit: true } });

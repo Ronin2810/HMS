@@ -1,16 +1,20 @@
-// backend/src/services/prescriptionService.js
 import prisma from '../prismaClient.js';
 
-export const getByVisit = (visitId) =>
+function todayBounds() {
+  const now = new Date();
+  const start = new Date(now); start.setHours(0,0,0,0);
+  const end = new Date(now); end.setHours(23,59,59,999);
+  return { start, end };
+}
+
+export const getTodayPrescriptions = () =>
   prisma.prescription.findMany({
-    where: { visit_id: visitId }
+    where: { created_at: { gte: todayBounds().start, lte: todayBounds().end } },
+    include: { patient: true, visit: true }
   });
 
-export const createPrescription = ({ visit_id, patient_id, medicines }) =>
-  prisma.prescription.create({ data: { visit_id, patient_id, medicines } });
+export const getByVisit = (visitId) =>
+  prisma.prescription.findMany({ where: { visit_id: visitId }, include: { patient: true } });
 
-export const updatePrescription = (id, data) =>
-  prisma.prescription.update({ where: { prescription_id: id }, data });
-
-export const deletePrescription = (id) =>
-  prisma.prescription.delete({ where: { prescription_id: id } });
+export const createPrescription = (data) =>
+  prisma.prescription.create({ data, include: { patient: true, visit: true } });

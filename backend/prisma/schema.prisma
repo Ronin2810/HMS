@@ -38,7 +38,7 @@ model Staff {
 }
 
 model Patient {
-  patient_id    String    @id @default(uuid())
+  patient_id    String    @id
   first_name    String
   last_name     String
   date_of_birth DateTime?
@@ -51,6 +51,7 @@ model Patient {
   reports       Report[]
   prescriptions Prescription[]
 }
+
 
 enum VisitType {
   fresh
